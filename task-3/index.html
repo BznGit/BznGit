@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <script src="./vue.js"></script>
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="menu">
+        <select class="menu-select" v-model="src" placeholder="choose country">
+          <option value="" disabled selected hidden>Choose source country</option>
+          <option v-for="(key, value) in country" class="menu-select" v-bind:value="value">
+            {{key}}
+          </option>
+        </select>
+        <select v-model="des">
+          <option value="" disabled selected hidden>Choose destination country </option>
+          <option v-for="(key,value) in country" class="menu-select" v-bind:value="value">{{key}}</option>
+        </select>
+        <div class="menu-input-item">
+          <input type="radio" value="3" v-model="nodes" v-on:change="choose">
+          <label>Все</label>
+        </div>
+        <div class="menu-input-item">
+          <input type="radio" value="0" v-model="nodes" v-on:change="choose">
+          <label>Прямое соединение</label>
+        </div>
+
+        <div class="menu-input-item">
+          <input type="radio" value="1" v-model="nodes" v-on:change="choose">
+          <label>Один дополнительный узел</label>
+        </div>
+        <div class="menu-input-item">
+          <input type="radio" value="2" v-model="nodes" v-on:change="choose">
+          <label>Два дополнительных узела</label>
+        </div>
+      </div>
+      <div class="routers">
+        <div class="routers-item">
+          <div class="routers-item-price">
+            <p>{{totalCost}}$</p>
+          </div>
+          <div class="routers-item-block">
+
+            <div class="routers-item-block-node">
+              <p>{{src}}</p>
+            </div>
+
+            <div class="routers-item-block-vec" v-if="nodeVis1">
+              <div class="routers-item-block-vec-box">
+                <p>dwdwd</p>
+              </div>
+              <img class="routers-item-block-node-img" src="./forward.png">
+            </div>
+
+            <div class="routers-item-block-node" v-if="nodeVis1">
+              <p>1111</p>
+            </div>
+
+            <div class="routers-item-block-vec" v-if="nodeVis2">
+              <div class="routers-item-block-vec-box">
+                <p>$</p>
+              </div>
+              <img class="routers-item-block-node-img" src="./forward.png">
+            </div>
+
+            <div class="routers-item-block-node" v-if="nodeVis2">
+              <p>efefef</p>
+            </div>
+
+            <div class="routers-item-block-vec">
+              <div class="routers-item-block-vec-box">
+                <p>$</p>
+              </div>
+              <img class="routers-item-block-node-img" src="./forward.png">
+            </div>
+
+            <div class="routers-item-block-node">
+              <p>{{des}}</p>
+            </div>
+
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <script type="module">
+      const request =
+      {
+        "data": {
+          "company": {
+            "waterTel": [
+              {
+                "src": "kz",
+                "des": "usa",
+                "price": 9
+              },
+              {
+                "src": "kz",
+                "des": "de",
+                "price": 14
+              },
+              {
+                "src": "usa",
+                "des": "de",
+                "price": 22
+              },
+              {
+                "src": "ru",
+                "des": "de",
+                "price": 10
+              },
+              {
+                "src": "ru",
+                "des": "kz",
+                "price": 31
+              },
+              {
+                "src": "ru",
+                "des": "usa",
+                "price": 22
+              }
+            ],
+            "airTel": [
+              {
+                "src": "kz",
+                "des": "usa",
+                "price": 11
+              },
+              {
+                "src": "kz",
+                "des": "de",
+                "price": 8
+              },
+              {
+                "src": "usa",
+                "des": "de",
+                "price": 16
+              },
+              {
+                "src": "ru",
+                "des": "de",
+                "price": 25
+              },
+              {
+                "src": "ru",
+                "des": "kz",
+                "price": 26
+              },
+              {
+                "src": "ru",
+                "des": "usa",
+                "price": 17
+              }
+            ],
+            "earthTel": [
+              {
+                "src": "kz",
+                "des": "usa",
+                "price": 17
+              },
+              {
+                "src": "kz",
+                "des": "de",
+                "price": 13
+              },
+              {
+                "src": "usa",
+                "des": "de",
+                "price": 19
+              },
+              {
+                "src": "ru",
+                "des": "de",
+                "price": 21
+              },
+              {
+                "src": "ru",
+                "des": "kz",
+                "price": 21
+              },
+              {
+                "src": "ru",
+                "des": "usa",
+                "price": 24
+              }
+            ],
+            "fireTel": [
+              {
+                "src": "kz",
+                "des": "usa",
+                "price": 23
+              },
+              {
+                "src": "kz",
+                "des": "de",
+                "price": 17
+              },
+              {
+                "src": "usa",
+                "des": "de",
+                "price": 21
+              },
+              {
+                "src": "ru",
+                "des": "de",
+                "price": 7
+              },
+              {
+                "src": "ru",
+                "des": "kz",
+                "price": 19
+              },
+              {
+                "src": "ru",
+                "des": "usa",
+                "price": 30
+              }
+            ]
+          },
+          "country": {
+            "ru": "Россия",
+            "kz": "Казахстан",
+            "de": "Германия",
+            "usa": "США"
+          }
+        }
+      }
+
+      const app = Vue.createApp({
+        data() {
+          return {
+            country: request.data.country,
+            src: 'ru',
+            des: 'de',
+            nodes: '',
+            nodeVis1: false,
+            nodeVis2: false,
+            solvedRouts1: null,
+
+          }
+        },
+
+        methods: {
+          startResolve() {
+            //ПОДГОТОВКА ГРАФА//
+            console.log('Resolve started');
+            let arrRoutsW = Object.entries(request.data.company.waterTel);
+            console.log('routs', arrRoutsW)                               // типовые маршруты
+
+            let graph = []
+            for (let key in request.data.country) {
+              if (this.src == key) graph.push({ node: key, visited: true, arr: [] });
+              else graph.push({ node: key, visited: false, arr: [] })
+            }
+            console.log('Coutrys:', graph);                             // типовые узлы
+
+            graph.forEach(currNode => {
+              arrRoutsW.forEach(elem => {
+                let obj = elem[1];
+
+                if (currNode.node == obj.src) currNode.arr.push({ [obj.des]: obj.price })
+
+              });
+            })
+            console.log('graf:', graph)                                   //граф 
+
+
+
+            let obhod = function (srt, end) {
+              if (srt.node == end.node) return
+              let dugi = srt.arr;
+              let rout = [[]];
+             
+
+              dugi.forEach(elem => {
+                console.log(elem[Object.keys(elem)])
+                if (elem[Object.keys(elem)] !== undefined) {
+                 j++; rout[i][j].push(elem);
+                  
+                  return rout;
+                  obhod(elem, end)
+
+                }
+              })
+            }
+            obhod(graph[0], graph[2]);
+
+
+
+            let i = 0;
+            let sum = 0;
+
+            ;
+
+
+          },
+          choose(e) {
+            let code = e.target.value;
+            console.log(typeof (code))
+            switch (code) {
+              case '0':
+                this.nodeVis1 = false;
+                this.nodeVis2 = false;
+                console.log('00')
+                break;
+              case '1':
+                this.nodeVis1 = true;
+                this.nodeVis2 = false;
+                console.log('11');
+                break;
+              case '2':
+                this.nodeVis1 = true;
+                this.nodeVis2 = true;
+                console.log('22');
+                break;
+              case '3':
+                this.nodeVis1 = true;
+                this.nodeVis2 = true;
+                console.log('22');
+                break;
+            }
+          }
+        },
+        watch: {
+          src: function () {
+            this.startResolve();
+
+          },
+          des: function () {
+            this.startResolve();
+          },
+        },
+      })
+      app.mount('#app');
+
+    </script>
+    <style>
+      #app {
+        display: flex;
+        flex-direction: row;
+        width: 80vw;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .menu {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        padding-left: 10px;
+        border-radius: 5px;
+        box-shadow:
+          inset rgb(5, 4, 4) -1px -1px 5px,
+          inset rgba(245, 242, 242, 0.9) 1px 1px 5px,
+          rgba(7, 2, 2, 0.8) 1px 1px 5px -1px;
+      }
+
+      select {
+        height: 50px;
+        width: 90%;
+        margin-top: 15px;
+        margin-bottom: 5px;
+        border: 0px;
+        border-bottom: 2px solid black;
+        margin-right: auto;
+      }
+
+      select> {
+        height: 50px;
+
+      }
+
+      .menu-input-item {
+        margin-top: 15px;
+        height: 50px;
+
+      }
+
+      .routers {
+        display: flex;
+        margin-left: 20px;
+        width: 100%;
+
+      }
+
+      .routers-item {
+        display: flex;
+        flex-direction: row;
+        height: 150px;
+        width: 100%;
+        border-radius: 5px;
+        box-shadow:
+          inset rgb(5, 4, 4) -1px -1px 5px,
+          inset rgba(245, 242, 242, 0.9) 1px 1px 5px,
+          rgba(7, 2, 2, 0.8) 1px 1px 5px -1px;
+      }
+
+      .routers-item-price {
+        display: flex;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 50px;
+        background-color: rgb(250, 115, 19);
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: 15px;
+        text-align: center;
+        vertical-align: middle;
+        color: cornsilk;
+      }
+
+      .routers-item-block {
+        display: flex;
+        align-items: center;
+        margin-right: 40px;
+        margin-left: auto;
+
+
+      }
+
+      .routers-item-block-node {
+        display: flex;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        background-color: rgb(48, 47, 47);
+        margin: 0px;
+        margin-bottom: 5px;
+        text-align: center;
+        vertical-align: middle;
+        color: white
+      }
+
+      .routers-item-block-vec {
+
+        height: 100%;
+        width: 100px;
+        margin: 10px;
+        justify-self: start;
+        flex-direction: column;
+        justify-content: center;
+
+
+      }
+
+      .routers-item-block-node-img {
+
+        display: flex;
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 15px;
+        width: 30px;
+        height: 30px;
+
+      }
+
+      .routers-item-block-vec-box {
+        display: flex;
+        width: 100px;
+        height: 25px;
+        background-color: orange;
+        color: white;
+        border-radius: 25px;
+        text-align: center;
+        align-items: center;
+        margin-top: 15px;
+        justify-content: center;
+
+      }
+
+    </style>
+  </body>
+
+</html>
